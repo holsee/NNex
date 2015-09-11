@@ -1,0 +1,20 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+Mixfile	mix.exs	/^defmodule Nnex.Mixfile do$/;"	m
+Nnex	lib/nnex.ex	/^defmodule Nnex do$/;"	m
+NnexTest	test/nnex_test.exs	/^defmodule NnexTest do$/;"	m
+SimpleNeuron	lib/simple_neuron.ex	/^defmodule SimpleNeuron do$/;"	m
+application	mix.exs	/^  def application do$/;"	f
+connect	lib/simple_neuron.ex	/^  def connect(neuron, to_neuron) do$/;"	f
+deps	mix.exs	/^  defp deps do$/;"	f
+forward_signal	lib/simple_neuron.ex	/^  defp forward_signal(%SimpleNeuron{to_conns: to_conns, input_signals: input_signals}, value) do $/;"	f
+handle_call	lib/simple_neuron.ex	/^  def handle_call({:connect, to_neuron}, from, %SimpleNeuron{to_conns: to_conns} = neuron) do$/;"	f
+handle_call	lib/simple_neuron.ex	/^  def handle_call({:connected, from_neuron}, from, %SimpleNeuron{from_conns: from_conns} = neuron) do$/;"	f
+handle_cast	lib/simple_neuron.ex	/^  def handle_cast({:signal, value, from}, %SimpleNeuron{} = neuron) do$/;"	f
+project	mix.exs	/^  def project do$/;"	f
+signal	lib/simple_neuron.ex	/^  def signal(neuron, value) do$/;"	f
+start_link	lib/simple_neuron.ex	/^  def start_link() do$/;"	f
