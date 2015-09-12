@@ -27,6 +27,6 @@ defmodule Nnex.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    []
+    [{:erlubi, github: "krestenkrab/erlubi"}]
   end
 end
