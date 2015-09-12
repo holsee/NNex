@@ -2,7 +2,7 @@ defmodule SimpleNeuron do
   use GenServer
   require Logger
 
-  defstruct from_conns: [], to_conns: [], input_signals: []
+  defstruct bias: 0.13, from_conns: [], to_conns: [], input_signals: []
 
   def start_link() do
     GenServer.start_link(SimpleNeuron, %SimpleNeuron{})
@@ -17,8 +17,8 @@ defmodule SimpleNeuron do
     GenServer.cast(neuron, {:signal, value, self()}) 
   end
   
-  defp forward_signal(%SimpleNeuron{to_conns: to_conns, input_signals: input_signals}, value) do 
-    Logger.info("Signal sending value #{value} from #{key(self())} to #{:io_lib.format("~p", [to_conns])}")
+  defp forward_signal(%SimpleNeuron{to_conns: to_conns}, value) do 
+    Logger.info("#{key(self())} sending value #{value} to #{:io_lib.format("~p", [to_conns])}")
     for conn <- to_conns, do: signal(conn, value)
   end
 
@@ -32,8 +32,7 @@ defmodule SimpleNeuron do
     {:reply, from, %SimpleNeuron{neuron|from_conns: [{key(from_neuron), weight}|from_conns] }}
   end  
 
- def handle_cast({:signal, value, from}, %SimpleNeuron{from_conns: from_conns, input_signals: input_signals} = neuron) 
-  when length(from_conns) == 0 do
+ def handle_cast({:signal, value, from}, %SimpleNeuron{from_conns: from_conns} = neuron) when length(from_conns) == 0 do
     weight = from_conns[key(from)] 
     log_signal(value, from, weight)
 
@@ -42,13 +41,15 @@ defmodule SimpleNeuron do
     {:noreply, %{neuron|input_signals: []}} 
   end
 
-  def handle_cast({:signal, value, from}, %SimpleNeuron{from_conns: from_conns, input_signals: input_signals} = neuron) 
+  def handle_cast({:signal, value, from}, %SimpleNeuron{bias: bias, from_conns: from_conns, input_signals: input_signals} = neuron) 
     when length(from_conns) == (length(input_signals)+1) do
+      Logger.info("#{key(self())} ACTIVATED!")
+
       weight = from_conns[key(from)]
       log_signal(value, from, weight)
 
       input_signals =  [{key(from), value}|input_signals]
-      new_value = compute_new_value(from_conns, input_signals)
+      new_value = activation_function(from_conns, input_signals, bias)
       forward_signal(neuron, new_value)
 
       {:noreply, %{neuron|input_signals: []}} 
@@ -57,7 +58,7 @@ defmodule SimpleNeuron do
   def handle_cast({:signal, value, from}, %SimpleNeuron{from_conns: from_conns, input_signals: input_signals} = neuron) do
     weight = from_conns[key(from)] 
     log_signal(value, from, weight)
-
+    
     input_signals =  [{key(from), value}|input_signals]
     
     {:noreply, %{neuron|input_signals: input_signals}} 
@@ -65,15 +66,20 @@ defmodule SimpleNeuron do
 
   # Helpers
   
-  defp compute_new_value(from_conns, input_signals) do
-    pre_activation_function(from_conns, input_signals) 
+  defp activation_function(from_conns, input_signals, bias) do
+    pre_activation_function(from_conns, input_signals, bias) 
     |> :math.tanh
   end
 
-  defp pre_activation_function(from_conns, input_signals) do
+  defp pre_activation_function(from_conns, input_signals, bias) do
     from_conns 
     |> Enum.map(fn({key, weight}) -> apply_weight(weight, input_signals[key]) end)
+    |> apply_bias(bias)
     |> Enum.sum
+  end
+
+  defp apply_bias(values, bias) do
+    [apply_weight(1, bias) | values]
   end
 
   defp apply_weight(weight, value) do
