@@ -2,10 +2,16 @@ defmodule SimpleNeuron do
   use GenServer
   require Logger
 
-  defstruct bias: 0.13, from_conns: [], to_conns: [], input_signals: []
+  defstruct bias: 0, from_conns: [], to_conns: [], input_signals: []
 
   def start_link() do
     GenServer.start_link(SimpleNeuron, %SimpleNeuron{})
+  end
+
+  def start_link(args) do
+    bias = args[:bias]
+    Logger.debug("Creating node with bias: #{bias}")
+    GenServer.start_link(SimpleNeuron, %SimpleNeuron{bias: bias})
   end
 
   def connect(neuron, to_neuron, weight) do
@@ -43,11 +49,11 @@ defmodule SimpleNeuron do
 
   def handle_cast({:signal, value, from}, %SimpleNeuron{bias: bias, from_conns: from_conns, input_signals: input_signals} = neuron) 
     when length(from_conns) == (length(input_signals)+1) do
-      Logger.info("#{key(self())} ACTIVATED!")
-
       weight = from_conns[key(from)]
       log_signal(value, from, weight)
 
+      Logger.info("#{key(self())} ACTIVATED!")
+      
       input_signals =  [{key(from), value}|input_signals]
       new_value = activation_function(from_conns, input_signals, bias)
       forward_signal(neuron, new_value)
